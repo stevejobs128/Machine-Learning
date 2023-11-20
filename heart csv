@@ -1,0 +1,38 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import seaborn as sns
+
+df = pd.read_csv("heart.csv")
+
+# Data Preparation
+data_shape = df.shape
+missing_values = df.isnull().sum()
+data_types = df.dtypes
+zeros_per_column = (df == 0).sum()
+mean_age = df['age'].mean()
+
+
+# Splitting the Data
+X = df.drop('target', axis='columns')
+y = df['target']
+xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=0.25, random_state=0)
+
+# Training the Logistic Regression Model
+reg = LogisticRegression()
+reg.fit(xtrain, ytrain)
+ypred = reg.predict(xtest)
+
+# Evaluation
+accuracy = accuracy_score(ytest, ypred)
+confusion = confusion_matrix(ytest, ypred)
+report = classification_report(ytest, ypred)
+
+print("Accuracy:", accuracy)
+print("Classification Report:")
+print(report)
+
+# Plot Confusion Matrix
+sns.heatmap(confusion, annot=True, fmt='d')

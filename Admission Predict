@@ -1,0 +1,81 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import confusion_matrix , accuracy_score 
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
+import seaborn as sns
+
+df = pd.read_csv("Admission_Predict.csv")
+print(df.to_string())
+
+df.columns = df.columns.str.rstrip()
+
+df.isna().sum()
+
+df.dtypes
+
+df.columns = df.columns.str.rstrip()
+df.loc[df['Chance of Admit']>=0.80,'Chance of Admit']=1
+df.loc[df['Chance of Admit']<0.80,'Chance of Admit']=0
+
+x = df.iloc[:,1:7]
+y = df.iloc[:,8]
+
+xtrain , xtest,ytrain , ytest = train_test_split(x,y,test_size=0.25,random_state=0)
+
+
+xtrain.shape
+
+ytrain.shape
+
+xtest.shape
+
+ytest.shape
+
+model = DecisionTreeClassifier(criterion='entropy')
+
+model.fit(xtrain,ytrain)
+
+ypred = model.predict(xtest)
+
+ypred
+
+matrix = confusion_matrix(ytest,ypred)
+print("Confusion Matrix is :",matrix)
+
+sns.heatmap(matrix,annot=True,fmt='d')
+
+accuracy = accuracy_score(ytest,ypred)
+
+print("accuracy =",accuracy)
+
+from sklearn.metrics import classification_report
+report = classification_report(ytest,ypred)
+print("Classification Report ",report)
+
+feature_names = df.columns[0:7]
+print(feature_names , end='')
+
+class_name = [str(x) for x in model.classes_]
+
+class_name
+
+from sklearn.tree import plot_tree 
+import matplotlib.pyplot as plt
+from pylab import *
+rcParams['figure.figsize']=50,30
+
+plot_tree(model,feature_names = feature_names,class_names = class_name , filled = True )
+
+from sklearn.model_selection import StratifiedKFold
+sf =  StratifiedKFold(n_splits=5,shuffle=True,random_state=0)
+
+depth = [1,2,3,4,5,6,7,8,9,10,11,12]
+for d in depth :
+    score = cross_val_score(tree.DecisionTreeClassifier(criterion='entropy',max_depth=d,random_state=0),xtrain,ytrain,cv=sf,scoring='accuracy')
+    print("Average Score for depth {} is {}".format(d,score.mean()))
+
+  score.mean()  
+
